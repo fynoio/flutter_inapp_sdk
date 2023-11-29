@@ -112,13 +112,14 @@ class FynoInApp {
       // Check if the message is not marked as read and update counts
       if (idDone != id &&
           !RegExp(r'"READ"')
-              .hasMatch(jsonEncode(prevMessage?[0]?['status'] ?? []))) {
+              .hasMatch(jsonEncode(prevMessage?['status'] ?? []))) {
         fynoInAppState._unreadCount--;
         idDone = id;
 
-        fynoInAppState._list.removeWhere((item) => item['_id'] == id);
-        fynoInAppState._count--;
+        fynoInAppState._unreadList.removeWhere((item) => item['_id'] == id);
       }
+      fynoInAppState._list.removeWhere((item) => item['_id'] == id);
+      fynoInAppState._count--;
     });
   }
 
