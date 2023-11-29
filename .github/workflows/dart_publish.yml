@@ -1,36 +1,14 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-​
-name: Dart
-​
+# .github/workflows/publish.yml
+name: Publish to pub.dev
 on:
-  release:
-    branches: [ "main" ]
-    
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+*" # for tags like: 'v1.2.3'
 jobs:
-  build:
-    runs-on: ubuntu-latest
-​
-    steps:
-      - uses: actions/checkout@v3
-​
-      # Note: This workflow uses the latest stable version of the Dart SDK.
-      # You can specify other versions if desired, see documentation here:
-      # https://github.com/dart-lang/setup-dart/blob/main/README.md
-      # - uses: dart-lang/setup-dart@v1
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
-​
-      - name: Install dependencies
-        run: dart pub get
-      - name: Analyze
-        run: dart analyze
-      - name: Check Publish Warnings
-        run: dart pub publish --dry-run
-      - name: Publish
-        uses: k-paxian/dart-package-publisher@v1.5.1
-        with:
-          credentialJson: ${{ secrets.PUB_CREDENTIAL_JSON }}
-          flutter: true
-          skipTests: true
+  publish:
+    permissions:
+      id-token: write # Required for authentication using OIDC
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      # Specify the github actions deployment environment
+      environment: pub.dev
