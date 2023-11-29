@@ -6,16 +6,14 @@ on:
     tags:
     - '[0-9]+.[0-9]+.[0-9]+*'
 
-# Publish using custom workflow
 jobs:
-  publish:
-    permissions:
-      id-token: write # Required for authentication using OIDC
+  publishing:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: dart-lang/setup-dart@v1
-      # - name: Install dependencies
-      #   run: flutter pub get
-      - name: Publish
-        run: dart pub publish
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+        
+      - name: '>> Dart package <<'
+        uses: k-paxian/dart-package-publisher@master
+        with:
+          credentialJson: ${{ secrets.PUB_CREDENTIAL_JSON }}
