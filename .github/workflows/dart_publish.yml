@@ -1,20 +1,21 @@
-name: Publish package to pub.dev
+# .github/workflows/publish.yml
+name: Publish to pub.dev
+
 on:
   push:
-    branches:   
-      - master
+    tags:
+    - '[0-9]+.[0-9]+.[0-9]+*'
+
+# Publish using custom workflow
 jobs:
-  build:
+  publish:
+    permissions:
+      id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
-    container:
-      image:  google/dart:latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Setup credentials
-      run: | 
-        mkdir -p ~/.pub-cache 
-        cat <<EOF > ~/.pub-cache/credentials.json
-        ${{secrets.PUB_CREDENTIAL_JSON}}
-        EOF
-    - name: Publish package
-      run: pub publish -f
+      - uses: actions/checkout@v3
+      - uses: dart-lang/setup-dart@v1
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Publish
+        run: dart pub publish --force
