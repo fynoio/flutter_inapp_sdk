@@ -22,7 +22,8 @@ class FynoInApp {
   }
 
   // Callback function to notify listeners of changes
-  late Function() onListUpdate;
+  late Function(dynamic data) onListUpdate;
+  late Function() stateUpdate;
 
   // Method to connect to the FynoInAppSocket
   void fynoInAppSocketConnect(
@@ -99,7 +100,7 @@ class FynoInApp {
       fynoInAppState._unreadCount = data['messages']['unread'];
       fynoInAppState._count = data['messages']['total'];
       fynoInAppState._page = data['page'];
-      onListUpdate.call();
+      stateUpdate.call();
     });
 
     // Handle tag updates
@@ -215,7 +216,8 @@ class FynoInApp {
     fynoInAppState._unreadList.insert(0, message);
     fynoInAppState._count++;
     fynoInAppState._unreadCount++;
-    onListUpdate.call();
+    onListUpdate.call(message);
+    stateUpdate.call();
   }
 
   // Method to handle message deletion
