@@ -21,7 +21,7 @@ class FynoNotificationIcon extends StatefulWidget {
 class FynoNotificationIconState extends State<FynoNotificationIcon> {
   @override
   Widget build(BuildContext context) {
-    widget.fynoInApp.onListUpdate = () {
+    widget.fynoInApp.stateUpdate = () {
       setState(() {});
     };
 
@@ -89,7 +89,7 @@ class NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    widget.fynoInApp.onListUpdate = () {
+    widget.fynoInApp.stateUpdate = () {
       if (mounted) {
         setState(() {});
       }
