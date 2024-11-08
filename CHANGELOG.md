@@ -9,3 +9,7 @@
 ## 1.0.2
 
 - Added a parameter in callback function
+
+## 1.0.3
+
+- make onListUpdate function nullable
