@@ -22,7 +22,7 @@ class FynoInApp {
   }
 
   // Callback function to notify listeners of changes
-  late Function(dynamic data) onListUpdate;
+  Function(dynamic data)? onListUpdate;
   late Function() stateUpdate;
 
   // Method to connect to the FynoInAppSocket
@@ -216,7 +216,7 @@ class FynoInApp {
     fynoInAppState._unreadList.insert(0, message);
     fynoInAppState._count++;
     fynoInAppState._unreadCount++;
-    onListUpdate.call(message);
+    onListUpdate?.call(message);
     stateUpdate.call();
   }
 

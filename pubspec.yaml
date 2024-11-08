@@ -1,6 +1,6 @@
 name: fyno_flutter_inapp
 description: Fyno's Flutter InApp SDK comes with the ability to provide its users with a multitude of notification features, all bundled into one, allowing it to smartly provide the best and optimised message delivery service from within your application itself.
-version: 1.0.2
+version: 1.0.3
 repository: https://github.com/fynoio/flutter_inapp_sdk
 
 environment:
