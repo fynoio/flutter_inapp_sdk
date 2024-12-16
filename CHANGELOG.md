@@ -13,3 +13,7 @@
 ## 1.0.3
 
 - make onListUpdate function nullable
+
+## 1.0.4
+
+- added mounted check
