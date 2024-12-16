@@ -65,7 +65,9 @@ class FynoNotificationIconState extends State<FynoNotificationIcon> {
   }
 
   void onUpdate() {
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 }
 
