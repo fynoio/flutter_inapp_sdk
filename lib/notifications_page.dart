@@ -4,13 +4,33 @@ import 'package:get_time_ago/get_time_ago.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart' as path;
 
+class ThemeConfig {
+  final Color? darkText;
+  final Color? lightText;
+  final Color? darkBackground;
+  final Color? lightBackground;
+  final Color? primary;
+
+  ThemeConfig({
+    this.lightText,
+    this.darkText,
+    this.lightBackground,
+    this.darkBackground,
+    this.primary,
+  });
+}
+
 class FynoNotificationIcon extends StatefulWidget {
   final FynoInApp fynoInApp;
   final Color iconColor;
+  final IconData? notificationIcon;
+  final ThemeConfig? themeConfig;
 
   const FynoNotificationIcon(
     this.fynoInApp,
     this.iconColor, {
+    this.notificationIcon,
+    this.themeConfig,
     Key? key,
   }) : super(key: key);
 
@@ -37,12 +57,13 @@ class FynoNotificationIconState extends State<FynoNotificationIcon> {
                 builder: (context) => NotificationsPage(
                   widget.fynoInApp,
                   onUpdate,
+                  themeConfig: widget.themeConfig,
                 ),
               ),
             );
           },
           icon: Icon(
-            Icons.notifications,
+            widget.notificationIcon ?? Icons.notifications_outlined,
             color: widget.iconColor,
           ),
         ),
@@ -76,9 +97,14 @@ class FynoNotificationIconState extends State<FynoNotificationIcon> {
 class NotificationsPage extends StatefulWidget {
   final FynoInApp fynoInApp;
   final Function onClick;
+  final ThemeConfig? themeConfig;
 
-  const NotificationsPage(this.fynoInApp, this.onClick, {Key? key})
-      : super(key: key);
+  const NotificationsPage(
+    this.fynoInApp,
+    this.onClick, {
+    this.themeConfig,
+    Key? key,
+  }) : super(key: key);
 
   @override
   NotificationsPageState createState() => NotificationsPageState();
@@ -171,6 +197,7 @@ class NotificationsPageState extends State<NotificationsPage> {
 
   AppBar buildAppBar(BuildContext context) {
     var unreadCount = widget.fynoInApp.fynoInAppState.unreadCount.toString();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return AppBar(
       leading: BackButton(
@@ -183,12 +210,19 @@ class NotificationsPageState extends State<NotificationsPage> {
             }
         },
       ),
-      iconTheme: IconThemeData(color: Colors.white),
-      backgroundColor: Theme.of(context).primaryColor,
+      iconTheme: IconThemeData(
+          color: isDarkMode
+              ? widget.themeConfig?.darkText ?? Colors.white
+              : widget.themeConfig?.lightText ?? Colors.black),
+      backgroundColor: isDarkMode
+          ? widget.themeConfig?.darkBackground ?? Colors.black
+          : widget.themeConfig?.lightBackground ?? Colors.white,
       title: Text(
         'Notifications',
         style: TextStyle(
-          color: Colors.white,
+          color: isDarkMode
+              ? widget.themeConfig?.darkText ?? Colors.white
+              : widget.themeConfig?.lightText ?? Colors.black,
         ),
       ),
       actions: [
@@ -220,8 +254,12 @@ class NotificationsPageState extends State<NotificationsPage> {
           ),
       ],
       bottom: TabBar(
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white,
+        labelColor: isDarkMode
+            ? widget.themeConfig?.darkText ?? Colors.white
+            : widget.themeConfig?.lightText ?? Colors.black,
+        unselectedLabelColor: isDarkMode
+            ? widget.themeConfig?.darkText ?? Colors.white
+            : widget.themeConfig?.lightText ?? Colors.black,
         tabs: [
           Tab(text: 'All'),
           Tab(text: 'Unread ($unreadCount)'),
@@ -297,6 +335,7 @@ class NotificationsPageState extends State<NotificationsPage> {
         onClick,
         tabName,
         scrollController,
+        themeConfig: widget.themeConfig,
       ),
     );
   }
@@ -308,6 +347,7 @@ class NotificationsTab extends StatelessWidget {
   final Function() onClick;
   final String tabName;
   final ScrollController? scrollController;
+  final ThemeConfig? themeConfig;
 
   const NotificationsTab(
     this.fynoInApp,
@@ -315,6 +355,7 @@ class NotificationsTab extends StatelessWidget {
     this.onClick,
     this.tabName,
     this.scrollController, {
+    this.themeConfig,
     Key? key,
   }) : super(key: key);
 
@@ -361,6 +402,7 @@ class NotificationsTab extends StatelessWidget {
       fynoInApp,
       message,
       onClick,
+      themeConfig: themeConfig,
     );
   }
 
@@ -383,11 +425,13 @@ class NotificationListTile extends StatefulWidget {
   final FynoInApp fynoInApp;
   final dynamic message;
   final Function() onClick;
+  final ThemeConfig? themeConfig;
 
   const NotificationListTile(
     this.fynoInApp,
     this.message,
     this.onClick, {
+    this.themeConfig,
     Key? key,
   }) : super(key: key);
 
@@ -420,10 +464,16 @@ class NotificationListTileState extends State<NotificationListTile> {
   }
 
   Widget buildListTile(BuildContext context, bool isUnread) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return ListTile(
       shape: Border(
         bottom: BorderSide(
-          color: Theme.of(context).secondaryHeaderColor.withOpacity(0.5),
+          color: isDarkMode
+              ? widget.themeConfig?.darkText?.withOpacity(0.5) ??
+                  Colors.white.withOpacity(0.5)
+              : widget.themeConfig?.lightText?.withOpacity(0.5) ??
+                  Colors.black.withOpacity(0.5),
         ),
       ),
       contentPadding: EdgeInsets.only(
@@ -431,14 +481,25 @@ class NotificationListTileState extends State<NotificationListTile> {
         left: 20,
         right: 20,
       ),
-      tileColor:
-          isUnread ? Theme.of(context).primaryColor.withOpacity(0.2) : null,
+      tileColor: isUnread
+          ? isDarkMode
+              ? widget.themeConfig?.darkBackground?.withOpacity(0.6) ??
+                  Colors.white.withOpacity(0.1)
+              : widget.themeConfig?.lightBackground?.withOpacity(0.6) ??
+                  Colors.black.withOpacity(0.1)
+          : Theme.of(context).brightness == Brightness.dark
+              ? widget.themeConfig?.darkBackground?.withOpacity(0.2) ??
+                  Colors.black
+              : widget.themeConfig?.lightBackground?.withOpacity(0.2) ??
+                  Colors.white,
       title: buildTitle(context),
     );
   }
 
   Widget buildTitle(BuildContext context) {
     var notificationContent = widget.message['notification_content'];
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Stack(
       children: [
         Row(
@@ -454,6 +515,9 @@ class NotificationListTileState extends State<NotificationListTile> {
                     Text(
                       notificationContent['title'].toString(),
                       style: TextStyle(
+                        color: isDarkMode
+                            ? widget.themeConfig?.darkText ?? Colors.white
+                            : widget.themeConfig?.lightText ?? Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
@@ -462,6 +526,9 @@ class NotificationListTileState extends State<NotificationListTile> {
                     Text(
                       notificationContent['body'].toString(),
                       style: TextStyle(
+                        color: isDarkMode
+                            ? widget.themeConfig?.darkText ?? Colors.white
+                            : widget.themeConfig?.lightText ?? Colors.black,
                         height: 1.5,
                         fontWeight: FontWeight.normal,
                         fontSize: 12,
@@ -478,7 +545,9 @@ class NotificationListTileState extends State<NotificationListTile> {
                                 widget.message['status'][0]['timestamp']),
                           ),
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: isDarkMode
+                                ? widget.themeConfig?.darkText ?? Colors.white
+                                : widget.themeConfig?.lightText ?? Colors.black,
                             fontSize: 10,
                             fontWeight: !widget.message['isRead']
                                 ? FontWeight.bold
@@ -551,6 +620,7 @@ class NotificationListTileState extends State<NotificationListTile> {
 
   Widget buildButton(dynamic button) {
     bool isPrimary = button['primary'].toLowerCase() == "true";
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       height: 25,
@@ -561,12 +631,20 @@ class NotificationListTileState extends State<NotificationListTile> {
         },
         style: ButtonStyle(
           backgroundColor: isPrimary
-              ? MaterialStateProperty.all(Theme.of(context).primaryColor)
+              ? MaterialStatePropertyAll(widget.themeConfig?.primary ??
+                  (isDarkMode ? Colors.white : Colors.black))
               : null,
           shape: MaterialStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4.0),
-              side: BorderSide(color: Theme.of(context).primaryColor),
+              side: BorderSide(
+                color: isPrimary
+                    ? widget.themeConfig?.primary ??
+                        (isDarkMode ? Colors.white : Colors.black)
+                    : isDarkMode
+                        ? widget.themeConfig?.darkText ?? Colors.white
+                        : widget.themeConfig?.lightText ?? Colors.black,
+              ),
             ),
           ),
         ),
@@ -574,7 +652,13 @@ class NotificationListTileState extends State<NotificationListTile> {
           button['label'].toString().toUpperCase(),
           style: TextStyle(
             fontSize: 8,
-            color: isPrimary ? Colors.white : Theme.of(context).primaryColor,
+            color: isPrimary
+                ? isDarkMode
+                    ? widget.themeConfig?.lightText ?? Colors.black
+                    : widget.themeConfig?.darkText ?? Colors.white
+                : isDarkMode
+                    ? widget.themeConfig?.darkText ?? Colors.white
+                    : widget.themeConfig?.lightText ?? Colors.black,
           ),
         ),
       ),
@@ -618,6 +702,8 @@ class NotificationListTileState extends State<NotificationListTile> {
     String videoUrl =
         widget.message['notification_content']['attachments']['attachment'];
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return SizedBox(
       height: 55,
       width: 55,
@@ -629,12 +715,18 @@ class NotificationListTileState extends State<NotificationListTile> {
           borderRadius: BorderRadius.circular(6.0),
           child: Container(
             padding: EdgeInsets.all(12),
-            color: Theme.of(context).primaryColor.withOpacity(0.15),
+            color: isDarkMode
+                ? widget.themeConfig?.darkBackground?.withOpacity(0.6) ??
+                    Colors.white.withOpacity(0.2)
+                : widget.themeConfig?.lightBackground?.withOpacity(0.6) ??
+                    Colors.black.withOpacity(0.2),
             child: Column(
               children: [
                 Icon(
                   Icons.play_circle,
-                  color: Theme.of(context).primaryColor,
+                  color: isDarkMode
+                      ? widget.themeConfig?.darkText ?? Colors.white
+                      : widget.themeConfig?.lightText ?? Colors.black,
                   size: 30,
                 ),
               ],
@@ -648,6 +740,7 @@ class NotificationListTileState extends State<NotificationListTile> {
   Widget buildDocument() {
     String documentUrl =
         widget.message['notification_content']['attachments']['attachment'];
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     String fileExtension = path.extension(path.basename(documentUrl));
 
@@ -666,18 +759,26 @@ class NotificationListTileState extends State<NotificationListTile> {
           borderRadius: BorderRadius.circular(6.0),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-            color: Theme.of(context).primaryColor.withOpacity(0.15),
+            color: isDarkMode
+                ? widget.themeConfig?.darkBackground?.withOpacity(0.6) ??
+                    Colors.white.withOpacity(0.2)
+                : widget.themeConfig?.lightBackground?.withOpacity(0.6) ??
+                    Colors.black.withOpacity(0.2),
             child: Column(
               children: [
                 Icon(
                   Icons.file_copy,
-                  color: Theme.of(context).primaryColor,
+                  color: isDarkMode
+                      ? widget.themeConfig?.darkText ?? Colors.white
+                      : widget.themeConfig?.lightText ?? Colors.black,
                   size: 20,
                 ),
                 Text(
                   fileType,
                   style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                    color: isDarkMode
+                        ? widget.themeConfig?.darkText ?? Colors.white
+                        : widget.themeConfig?.lightText ?? Colors.black,
                     fontSize: 10,
                   ),
                 ),
@@ -710,7 +811,9 @@ class NotificationListTileState extends State<NotificationListTile> {
                     width: 50,
                     height: 4.0,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).secondaryHeaderColor,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? widget.themeConfig?.darkText ?? Colors.white
+                          : widget.themeConfig?.lightText ?? Colors.black,
                       borderRadius: BorderRadius.circular(2.0),
                     ),
                   ),
@@ -760,7 +863,9 @@ class NotificationListTileState extends State<NotificationListTile> {
       child: IconButton(
         icon: Icon(
           Icons.more_horiz,
-          color: Theme.of(context).secondaryHeaderColor,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? widget.themeConfig?.darkText ?? Colors.white
+              : widget.themeConfig?.lightText ?? Colors.black,
         ),
         onPressed: () {
           showBottomSheet(context, isUnread, message);
