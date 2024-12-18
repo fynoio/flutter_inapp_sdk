@@ -21,3 +21,7 @@
 ## 1.0.5
 
 - added mounted check for all setstate
+
+## 1.0.6
+
+- customisable notification icon and color
