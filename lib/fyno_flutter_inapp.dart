@@ -13,11 +13,15 @@ class FynoInApp {
   // Method to get FynoNotificationIcon
   FynoNotificationIcon getFynoNotificationIconButton(
     BuildContext context,
-    Color color,
-  ) {
+    Color color, {
+    IconData? notificationIcon,
+    ThemeConfig? themeConfig,
+  }) {
     return FynoNotificationIcon(
       this,
       color,
+      notificationIcon: notificationIcon,
+      themeConfig: themeConfig,
     );
   }
 
