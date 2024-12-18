@@ -22,7 +22,9 @@ class FynoNotificationIconState extends State<FynoNotificationIcon> {
   @override
   Widget build(BuildContext context) {
     widget.fynoInApp.stateUpdate = () {
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     };
 
     return Stack(
@@ -175,7 +177,10 @@ class NotificationsPageState extends State<NotificationsPage> {
         onPressed: () => {
           widget.onClick(),
           Navigator.pop(context),
-          setState(() {}),
+          if (mounted)
+            {
+              setState(() {}),
+            }
         },
       ),
       iconTheme: IconThemeData(color: Colors.white),
@@ -229,12 +234,16 @@ class NotificationsPageState extends State<NotificationsPage> {
     switch (action) {
       case 'markAllAsRead':
         widget.fynoInApp.markAllAsRead().then((_) {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         });
         break;
       case 'deleteAll':
         widget.fynoInApp.deleteAllMessages().then((_) {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         });
         break;
     }
@@ -764,13 +773,17 @@ class NotificationListTileState extends State<NotificationListTile> {
     switch (value) {
       case 'markAsRead':
         widget.fynoInApp.markAsRead(message).then((_) {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
           widget.onClick();
         });
         break;
       case 'delete':
         widget.fynoInApp.deleteMessage(message).then((_) {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
           widget.onClick();
         });
         break;
@@ -780,7 +793,9 @@ class NotificationListTileState extends State<NotificationListTile> {
   void handleTap(bool isUnread) {
     if (isUnread) {
       widget.fynoInApp.markAsRead(widget.message).then((_) {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
         widget.onClick();
       });
     }

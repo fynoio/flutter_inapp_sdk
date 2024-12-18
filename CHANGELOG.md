@@ -17,3 +17,7 @@
 ## 1.0.4
 
 - added mounted check
+
+## 1.0.5
+
+- added mounted check for all setstate
