@@ -25,3 +25,7 @@
 ## 1.0.6
 
 - customisable notification icon and color
+
+## 1.0.7
+
+- added default logic to stateUpdate function to avoid error logs
