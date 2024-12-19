@@ -27,7 +27,7 @@ class FynoInApp {
 
   // Callback function to notify listeners of changes
   Function(dynamic data)? onListUpdate;
-  late Function() stateUpdate;
+  late Function stateUpdate = () => {print('Default stateUpdate triggered')};
 
   // Method to connect to the FynoInAppSocket
   void fynoInAppSocketConnect(
