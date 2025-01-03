@@ -51,6 +51,7 @@ class FynoNotificationIconState extends State<FynoNotificationIcon> {
       children: [
         IconButton(
           onPressed: () {
+            widget.fynoInApp.socket?.emit('updateLastSeen');
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -67,7 +68,7 @@ class FynoNotificationIconState extends State<FynoNotificationIcon> {
             color: widget.iconColor,
           ),
         ),
-        if (widget.fynoInApp.fynoInAppState.unreadCount > 0)
+        if (!widget.fynoInApp.fynoInAppState.isSeen)
           Positioned(
             right: 12,
             top: 10,
