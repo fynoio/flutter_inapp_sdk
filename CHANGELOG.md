@@ -29,3 +29,7 @@
 ## 1.0.7
 
 - added default logic to stateUpdate function to avoid error logs
+
+## 1.1.0
+
+- added reset function and seen check

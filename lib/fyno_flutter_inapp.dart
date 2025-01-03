@@ -28,6 +28,7 @@ class FynoInApp {
   // Callback function to notify listeners of changes
   Function(dynamic data)? onListUpdate;
   late Function stateUpdate = () => {print('Default stateUpdate triggered')};
+  socket_io.Socket? socket;
 
   // Method to connect to the FynoInAppSocket
   void fynoInAppSocketConnect(
@@ -37,44 +38,57 @@ class FynoInApp {
     origin,
     signature,
   ) {
+    print("socket status, $socket");
+    if (socket != null) {
+      print("Already connected to server");
+      return;
+    }
+
     // Create a socket and configure its options
-    socket_io.Socket socket = socket_io.io(
+    socket = socket_io.io(
       "wss://inapp.fyno.io",
       socket_io.OptionBuilder()
-          .setTransports(['websocket', 'polling']).setAuth({
-        'user_id': userId,
-        'WS_ID': workspaceId,
-        'Integration_ID': integrationId,
-      }).setExtraHeaders({
-        'Origin': origin,
-        'withCredentials': true,
-        'x-fyno-signature': signature,
-      }).build(),
+          .setTransports(['websocket', 'polling'])
+          .setAuth({
+            'user_id': userId,
+            'WS_ID': workspaceId,
+            'Integration_ID': integrationId,
+          })
+          .setExtraHeaders({
+            'Origin': origin,
+            'withCredentials': true,
+            'x-fyno-signature': signature,
+          })
+          .enableForceNew()
+          .build(),
     );
 
     // Handle socket error
-    socket.onError((error) => print(error));
+    socket?.onError((error) => print(error));
 
-    // Handle socket disconnection and attempt reconnection
-    socket.onDisconnect((_) {
-      print('Disconnected from the server, reconnecting');
-      socket.connect();
+    socket?.onDisconnect((_) {
+      print('Disconnected from the server');
     });
 
     // Handle successful connection to the server
-    socket.on('connectionSuccess', (_) {
+    socket?.on('connectionSuccess', (_) {
       print('Connected to the server');
       // Initialize variables and emit request for messages
       fynoInAppState._list = [];
       fynoInAppState._count = 0;
       fynoInAppState._unreadCount = 0;
-      fynoInAppState._fynoInAppSocket = socket;
       fynoInAppState._signature = signature;
-      socket.emit('get:messages', {'filter': 'all', 'page': 1});
+      socket?.emit('get:messages', {'filter': 'all', 'page': 1});
+      socket?.emit('updateLastSeen');
+    });
+
+    socket?.on('lastSeenUpdated', (data) {
+      print(data);
+      fynoInAppState.isSeen = data;
     });
 
     // Handle incoming messages
-    socket.on('message', (data) {
+    socket?.on('message', (data) {
       // Check if the message is not silent and handle it
       if (!(data?['notification_content']?['silent_message'] ?? true)) {
         _handleIncomingMessage(data);
@@ -82,7 +96,7 @@ class FynoInApp {
     });
 
     // Handle messages state updates
-    socket.on('messages:state', (data) {
+    socket?.on('messages:state', (data) {
       // Update message lists and counts based on server response
       fynoInAppState._list =
           (data['messages']['messages']?.length > 0 && data['page'] > 2)
@@ -108,7 +122,7 @@ class FynoInApp {
     });
 
     // Handle tag updates
-    socket.on('tag:updated', (id) {
+    socket?.on('tag:updated', (id) {
       var idDone = '';
 
       var prevMessage = fynoInAppState._list
@@ -126,6 +140,26 @@ class FynoInApp {
       fynoInAppState._list.removeWhere((item) => item['_id'] == id);
       fynoInAppState._count--;
     });
+  }
+
+  void reset() {
+    if (socket != null) {
+      socket?.dispose();
+      socket = null;
+      resetDefaults();
+    } else {
+      print("Socket not initialized");
+    }
+  }
+
+  void resetDefaults() {
+    fynoInAppState._list = [];
+    fynoInAppState._unreadList = [];
+    fynoInAppState._count = 0;
+    fynoInAppState._unreadCount = 0;
+    fynoInAppState._page = 1;
+    fynoInAppState._signature = '';
+    fynoInAppState.isSeen = true;
   }
 
   // Private method to handle status changes
@@ -173,12 +207,11 @@ class FynoInApp {
   Future<void> loadMoreNotifications(String type, int page) {
     final Completer<void> completer = Completer<void>();
 
-    fynoInAppState._fynoInAppSocket?.once('messages:state', (_) {
+    socket?.once('messages:state', (_) {
       completer.complete();
     });
 
-    fynoInAppState._fynoInAppSocket
-        ?.emit('get:messages', {'filter': type, 'page': page});
+    socket?.emit('get:messages', {'filter': type, 'page': page});
 
     return completer.future;
   }
@@ -187,12 +220,11 @@ class FynoInApp {
   Future<void> deleteAllMessages() {
     final Completer<void> completer = Completer<void>();
 
-    fynoInAppState._fynoInAppSocket?.once('messages:state', (_) {
+    socket?.once('messages:state', (_) {
       completer.complete();
     });
 
-    fynoInAppState._fynoInAppSocket
-        ?.emit('markAll:delete', fynoInAppState._signature);
+    socket?.emit('markAll:delete', fynoInAppState._signature);
     fynoInAppState._unreadCount = 0;
 
     return completer.future;
@@ -202,12 +234,11 @@ class FynoInApp {
   Future<void> markAllAsRead() {
     final Completer<void> completer = Completer<void>();
 
-    fynoInAppState._fynoInAppSocket?.once('messages:state', (_) {
+    socket?.once('messages:state', (_) {
       completer.complete();
     });
 
-    fynoInAppState._fynoInAppSocket
-        ?.emit('markAll:read', fynoInAppState._signature);
+    socket?.emit('markAll:read', fynoInAppState._signature);
     fynoInAppState._unreadCount = 0;
 
     return completer.future;
@@ -228,12 +259,12 @@ class FynoInApp {
   Future<void> deleteMessage(notification) async {
     final Completer<void> completer = Completer<void>();
 
-    fynoInAppState._fynoInAppSocket?.once('statusUpdated', (status) {
+    socket?.once('statusUpdated', (status) {
       _handleChangeStatus(status);
       completer.complete();
     });
 
-    fynoInAppState._fynoInAppSocket?.emit('message:deleted', notification);
+    socket?.emit('message:deleted', notification);
 
     return completer.future;
   }
@@ -242,12 +273,12 @@ class FynoInApp {
   Future<void> markAsRead(notification) async {
     final Completer<void> completer = Completer<void>();
 
-    fynoInAppState._fynoInAppSocket?.once('statusUpdated', (status) {
+    socket?.once('statusUpdated', (status) {
       _handleChangeStatus(status);
       completer.complete();
     });
 
-    fynoInAppState._fynoInAppSocket?.emit('message:read', notification);
+    socket?.emit('message:read', notification);
 
     return completer.future;
   }
@@ -262,7 +293,7 @@ class FynoInAppState {
   var _unreadCount = 0;
   var _page = 1;
   String _signature = '';
-  late socket_io.Socket? _fynoInAppSocket;
+  bool isSeen = true;
 
   // Define getters for the variables
   List get list => _list;
