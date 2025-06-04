@@ -542,9 +542,7 @@ class NotificationListTileState extends State<NotificationListTile> {
                       children: [
                         Text(
                           GetTimeAgo.parse(
-                            DateTime.fromMillisecondsSinceEpoch(
-                                widget.message['status'][0]['timestamp']),
-                          ),
+                              DateTime.parse(widget.message['createdAt'])),
                           style: TextStyle(
                             color: isDarkMode
                                 ? widget.themeConfig?.darkText ?? Colors.white

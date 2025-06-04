@@ -79,11 +79,9 @@ class FynoInApp {
       fynoInAppState._unreadCount = 0;
       fynoInAppState._signature = signature;
       socket?.emit('get:messages', {'filter': 'all', 'page': 1});
-      socket?.emit('updateLastSeen');
     });
 
     socket?.on('lastSeenUpdated', (data) {
-      print(data);
       fynoInAppState.isSeen = data;
     });
 
