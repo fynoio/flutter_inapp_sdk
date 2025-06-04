@@ -33,3 +33,7 @@
 ## 1.1.0
 
 - added reset function and seen check
+
+## 1.1.1
+
+- fixed UI rendering issue for null timestamp
