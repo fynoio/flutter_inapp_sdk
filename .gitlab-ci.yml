@@ -13,7 +13,7 @@ sonarqube_scan:
     - apk add --no-cache curl jq
   script:
     - sonar-scanner --version
-    - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.sources=. -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
+    - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.sources=lib -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
     - echo "Waiting for SonarQube to process the analysis..."
     - sleep 20 # You may tune this value based on processing speed
 
