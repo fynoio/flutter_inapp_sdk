@@ -5,3 +5,5 @@
 .flutter*
 .vscode/
 doc/
+
+example/
